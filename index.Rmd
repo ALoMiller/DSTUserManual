@@ -1,9 +1,24 @@
 --- 
-title: "YOUR TITLE HERE"
-author: "YOUR NAME HERE"
+title: "Northwest Atlantic Protected Species Decision Support Tool User Manual"
+author: "version 4.2.00"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 ---
 
-# Down the rabbit-hole
+# Preparing the DST Model Run
 
+## Example Base Run Script
+
+## InputActions Structures 
+
+### Saved .csv File
+
+### Create List of Actions
+
+### Refun or Modify Previous Scenario
+
+## Optional Input List Inputs
+
+### Available Fisheries
+
+###Available Scenario Actions
