@@ -1,5 +1,5 @@
 preparing-the-dst-model-run
-example-base-run-script
+example-base-run-code
 inputactions-structures
 saved-.csv-file
 create-list-of-actions
