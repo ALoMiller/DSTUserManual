@@ -83,9 +83,9 @@
 <ul>
 <li class="chapter" data-level="1.2.1" data-path="index.html"><a href="index.html#saved-.csv-file"><i class="fa fa-check"></i><b>1.2.1</b> Saved .csv File</a></li>
 <li class="chapter" data-level="1.2.2" data-path="index.html"><a href="index.html#create-list-of-actions"><i class="fa fa-check"></i><b>1.2.2</b> Create List of Actions</a></li>
-<li class="chapter" data-level="1.2.3" data-path="index.html"><a href="index.html#refun-or-modify-previous-scenario"><i class="fa fa-check"></i><b>1.2.3</b> Refun or Modify Previous Scenario</a></li>
+<li class="chapter" data-level="1.2.3" data-path="index.html"><a href="index.html#rerun-or-modify-previous-scenario"><i class="fa fa-check"></i><b>1.2.3</b> Rerun or Modify Previous Scenario</a></li>
 </ul></li>
-<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#optional-input-list-inputs"><i class="fa fa-check"></i><b>1.3</b> Optional Input List Inputs</a>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#optional-inputlist-inputs"><i class="fa fa-check"></i><b>1.3</b> Optional InputList Inputs</a>
 <ul>
 <li class="chapter" data-level="1.3.1" data-path="index.html"><a href="index.html#available-fisheries"><i class="fa fa-check"></i><b>1.3.1</b> Available Fisheries</a></li>
 <li class="chapter" data-level="1.3.2" data-path="index.html"><a href="index.html#available-scenario-actions"><i class="fa fa-check"></i><b>1.3.2</b> Available Scenario Actions</a></li>
@@ -128,7 +128,7 @@
 <h1><span class="header-section-number">1</span> Preparing the DST Model Run<a href="index.html#preparing-the-dst-model-run" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <div id="example-base-run-script" class="section level2 hasAnchor" number="1.1">
 <h2><span class="header-section-number">1.1</span> Example Base Run Script<a href="index.html#example-base-run-script" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To begin, we source the model code and set directories and specifications for model inputs and input actions (either defined in a .csv file or within the R code [explained in section 1.2]).</p>
+<p>To begin, we source the model code and set directories and specifications for model inputs and InputActions (either defined in a .csv file or within the R code [explained in section 1.2]). For this example we have named our scenario “MySubfolderName.”</p>
 <pre><code>rm(list=ls()) ## Clear out global environment
 HD=&quot;//net/work4/LobsterGroup/Management/RightWhales/DecisionSupportTool&quot;; setwd(HD) ## set directory to where inputs will be read from 
 Version=&quot;DST_V4.2.00.R&quot; ## Specify which DST version to load/run
@@ -155,16 +155,50 @@ DecisionTool(DecisionToolInputs = InputList) ## Call DST Function</code></pre>
 <h2><span class="header-section-number">1.2</span> InputActions Structures<a href="index.html#inputactions-structures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div id="saved-.csv-file" class="section level3 hasAnchor" number="1.2.1">
 <h3><span class="header-section-number">1.2.1</span> Saved .csv File<a href="index.html#saved-.csv-file" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>When defining InputActions in the .csv file structure, an Excel spreadsheet (Ex. ScenarioTemplate_V4.0.0.xlsx) is used as a starting template for management. For each line, an action is specified and can be defined by fishery, spatial, and temporal bounds. Each additional column that subsets the action can be viewed as an “or” statement while each additional line (new action) can be viewed as an “and” statement.</p>
+<div class="figure">
+<img src="images/InputSpreadsheetExample.png" alt="" />
+<p class="caption">An example InputActions spreadsheet in .csv file structure with two management actions. The first action restricts the model run to only Southern New England (SNE) and implements a soak limit on gillnet fisheries in Massachusetts (MA) waters for 1 day.</p>
+</div>
+<p>This Excel spreadsheet should be saved with a new name for the scenario run with the .csv file extension in the InputSpreadsheets directory (Ex. DecisionSupportTool/InputSpreadsheets/MySubfolderName/ExampleCSV.csv). “Source” tells the DST what format the input is in so it can read in the scenario inputs properly.</p>
+<pre><code>InputActions = list(Name = “MySubfolderName/ExampleCSV.csv”,
+    Source = “Wide”)</code></pre>
 </div>
 <div id="create-list-of-actions" class="section level3 hasAnchor" number="1.2.2">
 <h3><span class="header-section-number">1.2.2</span> Create List of Actions<a href="index.html#create-list-of-actions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Write individual actions as lists, then merge together as list of lists to write into InputActions.
+Example code for generating input list structure within R script:</p>
+<pre><code>A1 &lt;- list(Action = &quot;ModelConstraint&quot;, 
+           Region = &quot;GOM_GBK,SNE&quot;)
+A2 &lt;- list(Action = &quot;Closure&quot;, 
+           Fishery = &quot;Lobster&quot;,
+           Months = &quot;1,2&quot;,
+           Shapefile = &quot;South_Island_Restricted_Area_DST&quot;)
+A3 &lt;- list(Action = &quot;Closure&quot;,
+           Fishery = &quot;Gillnet&quot;,
+           StatArea = &quot;514&quot;)
+A4 &lt;- list(Action = &quot;GearReduction&quot;,
+           StateFed = &quot;State&quot;)
+My.Input.List &lt;- list(A1,A2,A3,A4)</code></pre>
+<p>Since the DST will not be reading in an existing CSV, choose a Run Name you’d like to be written into your subfolder. “Source” is now the name of the list of lists you’ve just created.</p>
+<pre><code>InputActions = list(Name = “MySubfolderName/MyRunName”,
+    Source = My.Input.List)</code></pre>
+<p>Be sure not to put “.csv” file at end of “MyRunName”. This will lead the model to look for a CSV file within the “InputSpreadsheets/MySubfolderName” rather than read your list.</p>
 </div>
-<div id="refun-or-modify-previous-scenario" class="section level3 hasAnchor" number="1.2.3">
-<h3><span class="header-section-number">1.2.3</span> Refun or Modify Previous Scenario<a href="index.html#refun-or-modify-previous-scenario" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="rerun-or-modify-previous-scenario" class="section level3 hasAnchor" number="1.2.3">
+<h3><span class="header-section-number">1.2.3</span> Rerun or Modify Previous Scenario<a href="index.html#rerun-or-modify-previous-scenario" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>At the beginning of each DST run, the Scenario Inputs and InputActions are written into an “.RData” file within the subfolder specified under “InputActions = list()”. To rerun or modify a model, this “.RData” file can be read back in.
+The following code will read in an object to your R Environment named “DecisionToolInputs”</p>
+<p>load(paste0(HD,“/Scenarios/MySubfolderName/MyRunName/MyRunName_DecisionToolInputs.Rdata”))</p>
+<p>To rerun the model as-is, a new InputList is not required, and the DST function can be called with the following line</p>
+<p>DecisionTool(DecisionToolInputs)</p>
+<p>You can also modify the structure of this model and rerun. For example, say that MyRunName was initially run with HighResolution = FALSE, but now a high resolution model is requested. To do this…</p>
+<p>DecisionToolInputs$HighResolution &lt;- TRUE
+DecisionTool(DecisionToolInputs)</p>
 </div>
 </div>
-<div id="optional-input-list-inputs" class="section level2 hasAnchor" number="1.3">
-<h2><span class="header-section-number">1.3</span> Optional Input List Inputs<a href="index.html#optional-input-list-inputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="optional-inputlist-inputs" class="section level2 hasAnchor" number="1.3">
+<h2><span class="header-section-number">1.3</span> Optional InputList Inputs<a href="index.html#optional-inputlist-inputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div id="available-fisheries" class="section level3 hasAnchor" number="1.3.1">
 <h3><span class="header-section-number">1.3.1</span> Available Fisheries<a href="index.html#available-fisheries" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 </div>

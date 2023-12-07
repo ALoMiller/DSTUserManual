@@ -3,8 +3,8 @@ example-base-run-script
 inputactions-structures
 saved-.csv-file
 create-list-of-actions
-refun-or-modify-previous-scenario
-optional-input-list-inputs
+rerun-or-modify-previous-scenario
+optional-inputlist-inputs
 available-fisheries
 available-scenario-actions
 inside-the-dst-initial-load-and-configure
