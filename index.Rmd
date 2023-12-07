@@ -9,16 +9,87 @@ site: bookdown::bookdown_site
 
 ## Example Base Run Script
 
+To begin, we source the model code and set directories and specifications for model inputs and InputActions (either defined in a .csv file or within the R code [explained in section 1.2]). For this example we have named our scenario "MySubfolderName."
+```
+rm(list=ls()) ## Clear out global environment
+HD="//net/work4/LobsterGroup/Management/RightWhales/DecisionSupportTool"; setwd(HD) ## set directory to where inputs will be read from 
+Version="DST_V4.2.00.R" ## Specify which DST version to load/run
+source(paste0(HD, "/function_", Version)) ## Load DST version/functions into R environment
+
+## REQUIRED InputList INPUTS
+InputList = list(
+  HomeDir=HD, ## home directory for subdirectories
+  ModelVersion=Version, ## model version
+  InputActions=list(Name = "MySubfolderName/ExampleCSV.csv",
+                    Source=”Wide”), ## see Section 1.2 Below
+  MapRefDomain="MapRef_3.9.2.Rdata", ## MapRef 
+  GearMapName = "FisheryInputs_AllEastCoast_v4.0.1.Rdata", ## Fishery Input Layer
+  ThreatModel="ThreatMod_RW_Selectivity_Uncertainty.Rdata", ## Gear Threat Model
+  WhaleHabitatModel="Duke_RightWhaleModel_v12_1019.Rdata", ## Whale Habitat Model
+WhaleVertDistInput=list(File="RightWhaleVerticalDistribution_CSA_V1.1.Rdata", Distribution="Ensemble"), ## Whale Vertical Distribution
+  WhaleDimensions="WhaleDimensions_AdHoc.Rdata", ## Whale Body Dimensions
+  CommentText = “Example Comment Text” ## Written to output tables
+) ## close InputList
+
+DecisionTool(DecisionToolInputs = InputList) ## Call DST Function
+```
+
 ## InputActions Structures 
 
 ### Saved .csv File
 
+When defining InputActions in the .csv file structure, an Excel spreadsheet (Ex. ScenarioTemplate_V4.0.0.xlsx) is used as a starting template for management. For each line, an action is specified and can be defined by fishery, spatial, and temporal bounds. Each additional column that subsets the action can be viewed as an "or" statement while each additional line (new action) can be viewed as an "and" statement. 
+
+![An example InputActions spreadsheet in .csv file structure with two management actions. The first action restricts the model run to only Southern New England (SNE) and implements a soak limit on gillnet fisheries in Massachusetts (MA) waters for 1 day.](images/InputSpreadsheetExample.png)
+
+This Excel spreadsheet should be saved with a new name for the scenario run with the .csv file extension in the InputSpreadsheets directory (Ex. DecisionSupportTool/InputSpreadsheets/MySubfolderName/ExampleCSV.csv). “Source” tells the DST what format the input is in so it can read in the scenario inputs properly.
+```
+InputActions = list(Name = “MySubfolderName/ExampleCSV.csv”,
+	Source = “Wide”)
+```
 ### Create List of Actions
 
-### Refun or Modify Previous Scenario
+Write individual actions as lists, then merge together as list of lists to write into InputActions. 
+Example code for generating input list structure within R script:
+```
+A1 <- list(Action = "ModelConstraint", 
+           Region = "GOM_GBK,SNE")
+A2 <- list(Action = "Closure", 
+           Fishery = "Lobster",
+           Months = "1,2",
+           Shapefile = "South_Island_Restricted_Area_DST")
+A3 <- list(Action = "Closure",
+           Fishery = "Gillnet",
+           StatArea = "514")
+A4 <- list(Action = "GearReduction",
+           StateFed = "State")
+My.Input.List <- list(A1,A2,A3,A4)
+```
+Since the DST will not be reading in an existing CSV, choose a Run Name you’d like to be written into your subfolder. “Source” is now the name of the list of lists you’ve just created.
+```
+InputActions = list(Name = “MySubfolderName/MyRunName”,
+	Source = My.Input.List)
+```
+Be sure not to put “.csv” file at end of “MyRunName”. This will lead the model to look for a CSV file within the “InputSpreadsheets/MySubfolderName” rather than read your list. 
 
-## Optional Input List Inputs
+### Rerun or Modify Previous Scenario
+
+At the beginning of each DST run, the Scenario Inputs and InputActions are written into an “.RData” file within the subfolder specified under “InputActions = list()”. To rerun or modify a model, this “.RData” file can be read back in. 
+The following code will read in an object to your R Environment named “DecisionToolInputs”
+
+load(paste0(HD,"/Scenarios/MySubfolderName/MyRunName/MyRunName_DecisionToolInputs.Rdata"))
+
+To rerun the model as-is, a new InputList is not required, and the DST function can be called with the following line
+
+DecisionTool(DecisionToolInputs)
+
+You can also modify the structure of this model and rerun. For example, say that MyRunName was initially run with HighResolution = FALSE, but now a high resolution model is requested. To do this… 
+
+DecisionToolInputs$HighResolution <- TRUE
+DecisionTool(DecisionToolInputs)
+
+## Optional InputList Inputs
 
 ### Available Fisheries
 
-###Available Scenario Actions
+### Available Scenario Actions

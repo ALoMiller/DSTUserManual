@@ -5,4 +5,4 @@ edit: https://github.com/ALoMiller/DSTUserManual/edit/main/%s
 view: https://github.com/ALoMiller/DSTUserManual/blob/main/%s
 language:
   ui:
-    chapter_name: "Chapter "
+    chapter_name: ""

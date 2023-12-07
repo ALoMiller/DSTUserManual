@@ -88,6 +88,7 @@
 <li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#optional-input-list-inputs"><i class="fa fa-check"></i><b>1.3</b> Optional Input List Inputs</a>
 <ul>
 <li class="chapter" data-level="1.3.1" data-path="index.html"><a href="index.html#available-fisheries"><i class="fa fa-check"></i><b>1.3.1</b> Available Fisheries</a></li>
+<li class="chapter" data-level="1.3.2" data-path="index.html"><a href="index.html#available-scenario-actions"><i class="fa fa-check"></i><b>1.3.2</b> Available Scenario Actions</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="inside-the-dst-initial-load-and-configure.html"><a href="inside-the-dst-initial-load-and-configure.html"><i class="fa fa-check"></i><b>2</b> Inside the DST: Initial Load and Configure</a>
@@ -124,9 +125,31 @@
 <p class="date"><em>2023-12-07</em></p>
 </div>
 <div id="preparing-the-dst-model-run" class="section level1 hasAnchor" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Preparing the DST Model Run<a href="index.html#preparing-the-dst-model-run" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<h1><span class="header-section-number">1</span> Preparing the DST Model Run<a href="index.html#preparing-the-dst-model-run" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <div id="example-base-run-script" class="section level2 hasAnchor" number="1.1">
 <h2><span class="header-section-number">1.1</span> Example Base Run Script<a href="index.html#example-base-run-script" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To begin, we source the model code and set directories and specifications for model inputs and input actions (either defined in a .csv file or within the R code [explained in section 1.2]).</p>
+<pre><code>rm(list=ls()) ## Clear out global environment
+HD=&quot;//net/work4/LobsterGroup/Management/RightWhales/DecisionSupportTool&quot;; setwd(HD) ## set directory to where inputs will be read from 
+Version=&quot;DST_V4.2.00.R&quot; ## Specify which DST version to load/run
+source(paste0(HD, &quot;/function_&quot;, Version)) ## Load DST version/functions into R environment
+
+## REQUIRED InputList INPUTS
+InputList = list(
+  HomeDir=HD, ## home directory for subdirectories
+  ModelVersion=Version, ## model version
+  InputActions=list(Name = &quot;MySubfolderName/ExampleCSV.csv&quot;,
+                    Source=”Wide”), ## see Section 1.2 Below
+  MapRefDomain=&quot;MapRef_3.9.2.Rdata&quot;, ## MapRef 
+  GearMapName = &quot;FisheryInputs_AllEastCoast_v4.0.1.Rdata&quot;, ## Fishery Input Layer
+  ThreatModel=&quot;ThreatMod_RW_Selectivity_Uncertainty.Rdata&quot;, ## Gear Threat Model
+  WhaleHabitatModel=&quot;Duke_RightWhaleModel_v12_1019.Rdata&quot;, ## Whale Habitat Model
+WhaleVertDistInput=list(File=&quot;RightWhaleVerticalDistribution_CSA_V1.1.Rdata&quot;, Distribution=&quot;Ensemble&quot;), ## Whale Vertical Distribution
+  WhaleDimensions=&quot;WhaleDimensions_AdHoc.Rdata&quot;, ## Whale Body Dimensions
+  CommentText = “Example Comment Text” ## Written to output tables
+) ## close InputList
+
+DecisionTool(DecisionToolInputs = InputList) ## Call DST Function</code></pre>
 </div>
 <div id="inputactions-structures" class="section level2 hasAnchor" number="1.2">
 <h2><span class="header-section-number">1.2</span> InputActions Structures<a href="index.html#inputactions-structures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -144,7 +167,9 @@
 <h2><span class="header-section-number">1.3</span> Optional Input List Inputs<a href="index.html#optional-input-list-inputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div id="available-fisheries" class="section level3 hasAnchor" number="1.3.1">
 <h3><span class="header-section-number">1.3.1</span> Available Fisheries<a href="index.html#available-fisheries" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>###Available Scenario Actions</p>
+</div>
+<div id="available-scenario-actions" class="section level3 hasAnchor" number="1.3.2">
+<h3><span class="header-section-number">1.3.2</span> Available Scenario Actions<a href="index.html#available-scenario-actions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 
 </div>
 </div>

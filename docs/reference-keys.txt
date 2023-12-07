@@ -6,6 +6,7 @@ create-list-of-actions
 refun-or-modify-previous-scenario
 optional-input-list-inputs
 available-fisheries
+available-scenario-actions
 inside-the-dst-initial-load-and-configure
 read-input-list
 load-data
