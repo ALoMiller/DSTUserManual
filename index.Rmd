@@ -91,38 +91,14 @@ DecisionTool(DecisionToolInputs)
 
 The example base run code provided in Section 1.1 lists the mandatory inputs required in the `InputList`. Additional optional inputs are detailed in the table below.
 
-| Variable Name | Example Text or T/F | Default Input | Notes |
-|---|:---:|:---:|---|
-| ZoneAdjacencyFile = | “ExampleCSV.csv” | “ZoneAdjacency_DSTv3.9.1.csv” | File for describing where gear can be displaced to during closure scenarios |
-| TestScenario =  | TRUE or FALSE | TRUE | Run Scenario Inputs. If FALSE, only default/baseline inputs produced and scenario is NOT evaluated |
-| CoOccurrence =  | TRUE or FALSE | FALSE | Run ONLY Co-Occurrence Model. Risk/Threat will not be estimated or produced |
-| IncludeGroundGear =  | TRUE or FALSE | FALSE | Option to estimate Co-Occurrence and Risk associated with GroundGear (groundline and gillnets). If FALSE, only threat of vertical endlines is assessed |
-| HighResolution =  | TRUE or FALSE | FALSE | If TRUE, scenario is run at 1nm^2 resolution. If FALSE, run is conducted at 10nm^2 resolution |
-| RelocationCostExp =  | Positive Numeric Value | 1 | Cost of relocating gear during a closure scenario.  RelocationCost=Distance^(RelocationCostExp).  Higher values cause more 'fencing'; lower values spread gear more evenly outside of closures |
-| ExpressRedistribution =  | TRUE or FALSE | FALSE |  |
-| RopeStrengthResolution =  | Positive Numeric Value | 500 | Resolution that input rope strengths are rounded to. Lower values will lead to higher rope strength resolution, but will extend run time |
-| MinGearDensity =  | Positive Numeric Value | 1e-5 | Threshold minimum gear density within a cell. Fishery input observations with less than this threshold will be removed from further modelling.  |
-| AutoConstrain =  | TRUE or FALSE | FALSE | Option for DST to to automatically constrain spatial domain of scenario run to which area or fishery is specified in scenario actions |
-| ThreatBounds =  | TRUE or FALSE | FALSE | Option to produce upper and lower 95% confidence intervals from Threat Model on estimated Risk estimates |
-| CalculateAffectedLineDepth =  | TRUE or FALSE | FALSE |     |
-| SpLayout =  |  | NA |  |
-| PrintTables =  | TRUE or FALSE | TRUE | Option to print pdf of output tables- written to scenario subfolder specified in “InputActions = list()” |
-| PrintDefaultMaps = | TRUE or FALSE | TRUE | Option to print pdf of output default maps and map sources (RData files)- written to scenario subfolder specified in “InputActions = list()” |
-| PrintScenarioMaps =  | TRUE or FALSE | TRUE | Option to print pdf of output scenario maps and map sources (RData files)- written to scenario subfolder specified in “InputActions = list()” |
-| PrintRedistributionMaps =  | TRUE or FALSE | FALSE | Option to print output redistribution maps of gear redistributed from closures- written to scenario subfolder specified in “InputActions = list()” |
-| TruncateMaps =  | Positive Value between 0 and 1 | 1 | Upper quantile to truncate output maps at. Default value of “1” prints all output |
-| WriteOutputCSV =  | TRUE or FALSE | TRUE | Write default and scenario results output to csv- written to scenario subfolder specified in “InputActions = list()” |
-| WriteMapSources =  | TRUE or FALSE | FALSE | Option to print map sources (Rdata outputs) without printing pdf of output maps- written to scenario subfolder specified in “InputActions = list()” |
-| ProvideSplitOutput =  | TRUE or FALSE | FALSE | Option for DST to report Co-Occurrence and Risk from vertical lines and = GroundGear separately |
-| WriteDetailedOutput =  | TRUE or FALSE | FALSE | Option to write DST outputs from Stage 1 - 9 of the model as Rdata sources- written to scenario subfolder specified in “InputActions = list()” |
-| PrintSummary =  | TRUE or FALSE | FALSE | Option to write out model summary to R Console at end of DST run |
-| ArchiveInputSpreadsheet =  | TRUE or FALSE | FALSE | Remove scenario CSV from “InputActions = list()” scenario subfolder to an archive subfolder  |
-| AggregateStrings =  | TRUE or FALSE | FALSE | Option to aggregate String distributions within vessel classes to decrease run time |
-| ManageMemory =  | TRUE or FALSE | FALSE | Option to remove stage by stage output as the model progresses to reduce memory usage of scenario run |
-| NewPlots =  | TRUE or FALSE | TRUE | Option to produce original mapping structure (FALSE) or updated mapping structure (TRUE) |
-| PlotLMAs =  | TRUE or FALSE | FALSE | NOT YET FUNCTIONAL. Option to print outlines of Lobster Management Areas to output maps. |
-|  PlotStatAreas =  | TRUE or FALSE | FALSE | NOT YET FUNCTIONAL. Option to print outlines of Statistical Reporting Areas to output maps. |
-| SelectBaselineYears =  | Single value between 2012 and 2020 | NA | NOT YET FUNCTIONAL. Option to subset fishery layer to a single year that is used as baseline fishery layer for default and scenario Co-Occurrence and Risk calculations. |
+```{r, echo=FALSE, message=FALSE}
+library(magrittr)
+input.options <- readxl::read_excel('tables/OptionalInputList.xlsx') 
+input.options$Notes <- gsub("\u00A0", " ", input.options$Notes, fixed = TRUE)
+kableExtra::kable(input.options, "html") %>%
+  kableExtra::kable_styling(font_size = 10.5) %>%
+  kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
+```
 
 ### Available Fisheries
 
