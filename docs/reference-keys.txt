@@ -1,12 +1,12 @@
 preparing-the-dst-model-run
 example-base-run-code
-inputactions-structures
+inputactions
 saved-.csv-file
 create-list-of-actions
+available-scenario-inputactions
 rerun-or-modify-previous-scenario
 optional-inputlist-inputs
-available-fisheries
-available-scenario-actions
+available-fishery-inputs
 inside-the-dst-initial-load-and-configure
 read-input-list
 load-data

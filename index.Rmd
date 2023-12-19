@@ -34,14 +34,14 @@ WhaleVertDistInput=list(File="RightWhaleVerticalDistribution_CSA_V1.1.Rdata", Di
 DecisionTool(DecisionToolInputs = InputList) ## call DST function
 ```
 
-## InputActions Structures 
-Within `InputList`, `InputActions` defines the scenario or management actions to be tested. These user has the option to define these in either a saved spreadsheet .csv file or within the R code (explained in Section 1.2). For this example we have named our scenario "ScenarioName."
+## InputActions
+Within `InputList`, `InputActions` defines the scenario or management actions to be tested. The user has the option to define these in either a saved spreadsheet .csv file (Section 1.2.1) or within the R code (Section 1.2.2). For this example we have named our scenario "ScenarioName."
 
 ### Saved .csv File
 
 When defining InputActions in the .csv file structure, an Excel spreadsheet (Ex. ScenarioTemplate_V4.0.0.xlsx) is used as a starting template for management. For each line, an action is specified and can be defined by fishery, spatial, and temporal bounds. Each additional column that subsets the action can be viewed as an "or" statement while each additional line (new action) can be viewed as an "and" statement. Commas can be used when specifying multiple entries for an individual cell. In this example InputActions spreadsheet there are four management actions. The first action restricts the model run to Gulf of Maine and Georges Bank (GOM_GBK) and Southern New England (SNE). The second action implements a closure to the lobster fishery in the South Island Restricted Area for January and February. The third action implements a year round closure to the gillnet fishery in Statistical Reporting Area 514. And the fourth action applies a gear reduction to state waters.
 
-![](images/InputSpreadsheetExample.png)
+![Example input spreadsheet defining managment actions to be run in the DST.](images/InputSpreadsheetExample.png)
 
 This Excel spreadsheet should be saved with a new name for the scenario run with the .csv file extension in the InputSpreadsheets directory (Ex. DecisionSupportTool/InputSpreadsheets/ScenarioName/Example.csv). “Source” tells the DST what format the input is in so it can read in the scenario inputs properly.
 ```
@@ -72,6 +72,33 @@ InputActions = list(Name = “ScenarioName/Example”,
 ```
 Be sure not to put “.csv” file at end of “Example”. This will lead the model to look for a .csv file within the “InputSpreadsheets/ScenarioName” rather than read your list. 
 
+### Available Scenario InputActions
+
+Available management actions can be found in the dropdown menu of the Action column if using the input spreadsheet method. These are listed below with details on the required dependencies (fields within the input spreadsheet) associated with implementing them. In addition to the required dependencies, optional additions exist for all actions, including `Percentage` which allows a percent of the total action applied.
+
+```{r, echo=FALSE, message=FALSE}
+library(magrittr)
+action.dep <- data.frame(Action=c('NoAction','ModelConstraint','GearReduction','GearCap','SoakLimit','LineCap','Closure','StringLength','MaxGearWSingleLine','MaxVertRopeStrength','MaxHorizRopeStrength'), Required.Dependency=c('NA','At least one spatial, temporal, or fishery specific distinction','NA','GearCap','SoakLimit','LineCap','NA','StringRegulation, StringLength','MaxGearWSnglLn','MaxRopeStrength','MaxRopeStrength'), Notes=c('Runs a baseline model with no scenario actions','Constrains fishery input and map layer to the specified fishery, space and/or time constraints. If a single ModelConstraint action has multiple constraints, an "and" statement describes their implementation (e.g. [Action = ModelConstraint, StatArea = 514, Fishery = Lobster] results in the model being constrained to only records for the Lobster Fishery in StatArea 514.) If multiple ModelConstraint actions are used, an "or" statement describes their implementation. (e.g. [Action = ModelConstraint, State = MA] & [Action = ModelConstraint, StatArea = 514] then the model will be constrained to records within MA state waters AND Statistical Area 514.)','Removes all gear from specified fishery, location, and time duration. If no constraints are applied, all gear is removed. If a Percentage is not assigned, defaults to remove 100% of gear.','Reduces number of gear fished for each applicable vessel (determined by Optional Dependencies) fishing above the specified GearCap.','Reduces Soak time for each applicable vessel (determined by Optional Dependencies) fishing above the specified SoakLimit.','Reduces the number of lines for each applicable vessel (determined by Optional Dependencies) fishing above the specified LineCap.','Redistributes or removes applicable gear (determined by Optional Dependencies). If available, gear is redistributed to applicable neighboring cells, determined by the ZoneAdjacency input. If no fishery, space, or time is specified, all gear is removed.','Modifies applicable strings (determined by Optional Dependencies) according to the StringRegulation and StringLength.','Reduces strings using two lines per string within the applicable fishery, area and time (determined by Optional Dependencies) to one line per string. Strings currently fishing with a single endline are unaffected.','Reduces strength of applicable vertical lines (determined by Optional Dependencies) to MaxRopeStrength.','Reduces strength of applicable horizontal lines (determined by Optional Dependencies) to MaxRopeStrength.'))
+kableExtra::kable(action.dep, "html", col.names=c("Action","RequiredDependency","Notes")) %>%
+  kableExtra::kable_styling(font_size = 11) 
+```
+
+Constraints to these management actions can be spatial, temporal, or fishery specific. These are defined by the various columns in the input spreadsheet. All available options within each column are listed in the table below.
+
+```{r, echo=FALSE, message=FALSE}
+library(magrittr)
+action.constrain.options <- data.frame(Constrain.Type=c('Area','Area','Area','Area','Area','Area','Area','Area','Area','Time','Fishery'),Name=c('Region','LMA','State','StateFed','Exempt','StatArea','Depth','Distance','Shapefile','Month','Fishery'),Options=c('GOM_GBK, SNE, MAB, SE','A1, A2, A3, A2_3overlap, A4, A5, A6, OCC','ME, NH, MA, RI, CT, NY, NJ, DE, MD, VA, NC, SC, GA, FL','State, Fed','Exempt, NonExempt','All Statistical Reporting Areas within the US Atlantic EEZ from Maine to Florida','Positive value between 0 and 200','Positive value between 0 and 100','Applicable shapefile name saved in one of three directories (InputSHapefiles/ TempShapefiles/ ArchiveShapefiles)','1-12','Any subset of a fishery name or names (see Table X)'),Notes=c('Regional boundaries are used for easy spatial constraint, but they do not represent management boundaries.','LMA boundaries reference Lobster Management Areas throughout the US Atlantic.','State constraints include the individual state waters and all adjacent federal waters','Boundaries for State (0-3 nm) and Federal (>3 nm) waters.','Boundaries for areas exempt from federal regulation. NonExempt selects all waters that are subject to federal regulation (including applicable state waters.','StatArea boundaries are used for fishery reporting and management.','Depth is informed by bathymetry survey of the US Atlantic. Values of depth should be specified in meters.','Distance from shore. Value should be specified in miles.','Shapefile should be able to be read in using the R "sp" library function st_transform. Shapefile must overlap with DST MapRef.','Months must be written in as a whole number with no significant figures. To select multiple months, separate individual numbers by a comma (e.g. 1,2). Discontiguous months can also be selected.','All fisheries containing this character string will be selected and subject to the associated Action.'))
+
+kableExtra::kable(action.constrain.options, "html", col.names=c("Constraint Type","Name","Options","Notes")) %>%
+  kableExtra::kable_styling(font_size = 11) %>%
+  kableExtra::column_spec(1, background = "white") %>%
+  kableExtra::column_spec(2, background = "white") %>%
+  kableExtra::column_spec(3, background = "white") %>%
+  kableExtra::column_spec(4, background = "white") %>%
+  kableExtra::collapse_rows(columns=1) 
+```
+
+
 ### Rerun or Modify Previous Scenario
 
 At the beginning of each DST model run, the model inputs and scenario `InputActions` are written into an .RData file within the ScenarioName with an extension "_DecisionToolInputs". To rerun or modify a model, this .RData file can be read back into the R environment. 
@@ -82,24 +109,32 @@ To rerun the model as-is, a new `InputList` is not required and the DST function
 ```
 DecisionTool(DecisionToolInputs)
 ```
-The user can also modify the inputs of this model and rerun by redefining elements within the. For example, to modify rerun the above example changing the fishery input layer that is used within the model from GearMapName = "FisheryInputs_AllEastCoast_v4.0.1.Rdata" to GearMapName = "FisheryInputs_Gillnet_v3.5.5.Rdata" the user would apply the following code:
+The user can also modify the inputs of this model and rerun by redefining elements within the. For example, to modify rerun the above example changing the fishery input layer that is used within the model from `GearMapName = "FisheryInputs_AllEastCoast_v4.0.1.Rdata"` to `GearMapName = "FisheryInputs_Gillnet_v3.5.5.Rdata"` the user would apply the following code:
 ```
 DecisionToolInputs$GearMapName <- "FisheryInputs_Gillnet_v3.5.5.Rdata"
 DecisionTool(DecisionToolInputs)
 ```
 ## Optional InputList Inputs
 
-The example base run code provided in Section 1.1 lists the mandatory inputs required in the `InputList`. Additional optional inputs are detailed in the table below.
+The example base run code provided in Section 1.1 lists the mandatory inputs required in the `InputList`. Additional optional inputs are available to the user as detailed in the table below.
 
 ```{r, echo=FALSE, message=FALSE}
 library(magrittr)
-input.options <- readxl::read_excel('tables/OptionalInputList.xlsx') 
-input.options$Notes <- gsub("\u00A0", " ", input.options$Notes, fixed = TRUE)
-kableExtra::kable(input.options, "html") %>%
-  kableExtra::kable_styling(font_size = 10.5) %>%
-  kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
+input.options <- data.frame(Variable.Name=c('ZoneAdjacencyFile','TestScenario','CoOccurrence','IncludeGroundGear','HighResolution','RelocationCostExp',                                            'ExpressRedistribution','RopeStrengthResolution','MinGearDensity','AutoConstrain','ThreatBounds','CalculateAffectedLineDepth',
+                                              'SpLayout','PrintTables','PrintDefaultMaps','PrintScenarioMaps','PrintRedistributionMaps','TruncateMaps','WriteOutputCSV','WriteMapSources','ProvideSplitOutput','WriteDetailedOutput','PrintSummary','ArchiveInputSpreadsheet','AggregateStrings','ManageMemory','NewPlots','PlotLMAs','PlotStatAreas','SelectBaselineYears'), 
+                            Input.Format=c("'Example.csv'",'TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','Positive Numeric Value','TRUE or FALSE','Positive Numeric Value','Positive Numeric Value','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','NA','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','Numeric Value between 0 and 1','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','TRUE or FALSE','Numeric value between 2012 and 2020'), 
+                            Default.Input=c("'ZoneAdjacency_DSTv3.9.1.csv'",'TRUE','FALSE','FALSE','FALSE','1','FALSE','500','0.00001','FALSE','FALSE','FALSE','NA','TRUE','TRUE','TRUE','FALSE','1','TRUE','FALSE','FALSE','FALSE','FALSE','FALSE','FALSE','FALSE','TRUE','FALSE','FALSE','NA'), 
+                            Notes=c("File describing where gear can be displaced to during closure scenarios","Run Scenario Inputs; If FALSE, only default/baseline inputs produced and scenario is NOT evaluated","Run ONLY Co-Occurrence Mode; Risk/Threat will not be estimated or produced","Option to estimate Co-Occurrence and Risk associated with GroundGear (groundline and gillnets); If FALSE, only threat of vertical endlines is assessed","If TRUE, scenario is run at 1 $nm^{2}$ resolution; If FALSE, run is conducted at 10 $nm^{2}$ resolution","Cost of relocating gear during a closure scenario; Exponent applied to the distance relocated; Higher values cause more 'fencing'; lower values spread gear more evenly outside of closures","NA","Resolution that input rope strengths are rounded to; Lower values will lead to higher rope strength resolution, but will extend run time","Threshold minimum gear density within a cell; Fishery input observations with less than this threshold will be removed from further modelling.","Option for DST to to automatically constrain spatial domain of scenario run to which area or fishery is specified in scenario actions","Option to produce upper and lower 95% confidence intervals from Threat Model on estimated Risk estimates","NA","NA","Option to print pdf of output tables in scenario folder","Option to print pdf of output default maps and map sources (.RData files) in scenario folder","Option to print pdf of output scenario maps and map sources (.RData files) in scenario folder","Option to print output redistribution maps of gear redistributed from closures in scenario folder","Upper quantile to truncate output maps at; Default value of 1 prints all output","Write default and scenario results output to csv in scenario folder","Option to print map sources (Rdata outputs) without printing pdf of output maps in scenario folder","Option for DST to report Co-Occurrence and Risk from vertical lines and GroundGear separately","Option to write DST outputs from Stage 1 - 9 of the model as Rdata sources in scenario folder","Option to write out model summary to R Console at end of DST run","Save a copy of the input .csv in the scenario folder", "Option to aggregate String distributions within vessel classes to decrease run time","Option to remove stage by stage output as the model progresses to reduce memory usage of scenario run","Option to produce original mapping structure (FALSE) or updated mapping structure (TRUE)","NOT YET FUNCTIONAL; Option to print outlines of Lobster Management Areas to output maps","NOT YET FUNCTIONAL; Option to print outlines of Statistical Reporting Areas to output maps","NOT YET FUNCTIONAL; Option to subset fishery layer to a single year"))
+
+kableExtra::kable(input.options, "html", col.names=c("Variable Name","Input Format","Default Input","Notes")) %>%
+  kableExtra::kable_styling(font_size = 11)
+  
 ```
 
-### Available Fisheries
+## Available Fishery Inputs
 
-### Available Scenario Actions
+Fishery inputs are constructed from individual fisheries defined generally by gear type, region, and species within state or federal waters. These are combined into one coastwide fishery input (`FisheryInputs_AllEastCoast_v4.0.1.Rdata`) that accounts for all fixed-gear fisheries from Maine to Florida. The user can define the fishery input to be run in the DST with the `Gearmap` object in the `InputList` (Section 1.1). Individually built subgroups that made up this coastwide fishery input can also be specified if the user isn't interested in running the DST on all coastwide fixed-gear fisheries. Understanding these subgroups is also useful for applying management actions since any text used in the filename can be supplied in the Fishery column as a text string to subset the action, applying it only to those fisheries.
+
+![List of unique fishery inputs that make up `FisheryInputs_AllEastCoast_v4.0.1.Rdata`.](images/ListOfIndividualFisheryInputs.png)
+
+
