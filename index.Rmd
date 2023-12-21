@@ -89,7 +89,7 @@ Constraints to these management actions can be spatial, temporal, or fishery spe
 library(magrittr)
 action.constrain.options <- data.frame(Constrain.Type=c('Area','Area','Area','Area','Area','Area','Area','Area','Area','Time','Fishery'),Name=c('Region','LMA','State','StateFed','Exempt','StatArea','Depth','Distance','Shapefile','Month','Fishery'),Options=c('GOM_GBK, SNE, MAB, SE','A1, A2, A3, A2_3overlap, A4, A5, A6, OCC','ME, NH, MA, RI, CT, NY, NJ, DE, MD, VA, NC, SC, GA, FL','State, Fed','Exempt, NonExempt','All [Statistical Reporting Areas](https://www.fisheries.noaa.gov/resource/map/greater-atlantic-region-statistical-areas) within the US Atlantic EEZ from Maine to Florida','Positive value between 0 and 200','Positive value between 0 and 100','Applicable shapefile name saved in one of three directories: InputShapefiles/ <br> TempShapefiles/ <br> ArchiveShapefiles/','1-12','Any subset of a fishery name or names (see [Available Fishery Inputs])'),Notes=c('Regional boundaries are used for easy spatial constraint, but they do not represent management boundaries.','LMA boundaries reference [Lobster Management Areas](https://www.fisheries.noaa.gov/resource/map/lobster-management-areas) throughout the US Atlantic.','State constraints include the individual state waters and all adjacent federal waters','Boundaries for State (0-3 nm) and Federal (>3 nm) waters.','Boundaries for areas exempt from federal regulation. NonExempt selects all waters that are subject to federal regulation (including applicable state waters.','StatArea boundaries are used for fishery reporting and management.','Depth is informed by bathymetry survey of the US Atlantic. Values of depth should be specified in meters.','Distance from shore. Value should be specified in miles.','Shapefile should be able to be read in using the R "sp" library function st_transform. Shapefile must overlap with DST MapRef.','Months must be written in as a whole number with no significant figures. To select multiple months, separate individual numbers by a comma (e.g. 1,2). Discontiguous months can also be selected.','All fisheries containing this character string will be selected and subject to the associated Action.'))
 
-kableExtra::kable(action.constrain.options, "html", col.names=c("Constraint Type","Name","Options","Notes"), caption = 'Constraints for Actions within the DST and the available options', escape = FALSE, booktabs =  TRUE) %>%
+kableExtra::kable(action.constrain.options, "html", col.names=c("Constraint Type","Name","Options","Notes"), escape = FALSE, booktabs =  TRUE) %>%
   kableExtra::kable_styling(font_size = 11) %>%
   kableExtra::column_spec(1, background = "white") %>%
   kableExtra::column_spec(2, background = "white") %>%
@@ -141,5 +141,38 @@ Fishery inputs are constructed from individual fisheries defined generally by ge
 
 ![List of unique fishery inputs that make up `FisheryInputs_AllEastCoast_v4.0.1.Rdata`.](images/ListOfIndividualFisheryInputs.png)
 
+# Inside the DST: Initial Load and Configure
+To begin a scenario run of implemented management actions in the DST, begin by generating the `InputList` with either the Excel input spreadsheet ([Saved .csv File]) or within the R code ([Create List of Actions]) and configuring the user options. The flow chart below describes the process the model takes for implementing management actions, specifically which actions affect various gear quantifications and modifications.
+
+![The DST model has a modular design made up of various fishery and whale inputs (in dark blue), with a number of submodels (light blue headers) used to carry out calculations and transformations that are imposed by management actions (white exterior arrows) that eventually lead to resulting risk estimates.](images/FlowChart012723-04.png)
+
+## Read Input List
+The DST identifies all model run variables that have been specified and assigns default values for those that have not been specified. A subfolder is generated (if it doesn't already exist from a previous duplicated run). In our example from the above section, [InputActions], the subfolder is named 'ScenarioName.' The DST determines the structure of InputActions (the .csv file or R list) and begins unlisting the provided InputActions.
+
+## Load Data
+The DST then loads in the following data inputs:
+
+ - Fishery Input Layer
+ - Whale Density Layer
+ - Whale Vertical Distribution Layer
+ - Whale Body Dimensions
+ - Threat Model
+
+If any of these input files do not exist in the expected directory, the model will end and report an error that the specified file was not found. The model also checks for the four required elements within the fishery input layer (GearMap, GearPerString, CumulativeEffort, and LineStrength). Any missing shapefiles specified in the `InputActions` (see Table on constraints for actions in the [Available Scenario InputActions] section) will also prevent the DST from moving on to model calculation stages. The following section ([Inside the DST: Model Stages]) will lay out the order of model stages and discuss each in detail. 
+
+# Inside the DST: Model Stages
+```{r, echo=FALSE, message=FALSE}
+library(magrittr)
+model.stages <- data.frame(Model.Stage=c(1,1,1,1,2,3,3,4,5,5,6,7),Default.Calculations=c('Gear Density','Gear Density','Gear Density','Gear Density','String/Trawl Density','Vertical Lines','Vertical Lines','Ground Gear','Line Strength','Line Strength','Co-Occurrence','Threat'),Available.Scenario.Modifications=c('a. Gear Reductions','b. Closures','c. GearCaps','d. Soak Limits','String/Trawl Lengths','a. Line Caps','b. Endlines per String/Trawl','Gear Heights','a. Vertical Line Strengths','b. Horizontal Line Strengths',' ',' '))
+
+kableExtra::kable(model.stages, "html", col.names=c("Model Stage","Default Calculations","Available Scenario Modifications"), escape = FALSE, booktabs =  TRUE, align = "c") %>%
+  kableExtra::column_spec(1, background = "white") %>%
+  kableExtra::column_spec(2, background = "white") %>%
+   kableExtra::column_spec(3, background = "white") %>%
+  kableExtra::kable_styling(font_size = 11, full_width = F) %>%
+  kableExtra::collapse_rows(columns=1:2)
+```
+
+## Stage 1: Gear Reductions
 
 

@@ -23,7 +23,7 @@
 <meta name="author" content="version 4.2.00" />
 
 
-<meta name="date" content="2023-12-20" />
+<meta name="date" content="2023-12-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -124,7 +124,11 @@
             <section class="normal" id="section-">
 <div id="inside-the-dst-initial-load-and-configure" class="section level1 hasAnchor" number="2">
 <h1><span class="header-section-number">2</span> Inside the DST: Initial Load and Configure<a href="inside-the-dst-initial-load-and-configure.html#inside-the-dst-initial-load-and-configure" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>To begin a scenario run of implemented management actions in the DST, begin by generating the <code>InputList</code> with either the Excel input spreadsheet (<a href="index.html#saved-.csv-file">Saved .csv File</a>) or within the R code (<a href="index.html#create-list-of-actions">Create List of Actions</a>) and configuring the user options.</p>
+<p>To begin a scenario run of implemented management actions in the DST, begin by generating the <code>InputList</code> with either the Excel input spreadsheet (<a href="index.html#saved-.csv-file">Saved .csv File</a>) or within the R code (<a href="index.html#create-list-of-actions">Create List of Actions</a>) and configuring the user options. The flow chart below describes the process the model takes for implementing management actions, specifically which actions affect various gear quantifications and modifications.</p>
+<div class="figure">
+<img src="images/FlowChart012723-04.png" alt="" />
+<p class="caption">The DST model has a modular design made up of various fishery and whale inputs (in dark blue), with a number of submodels (light blue headers) used to carry out calculations and transformations that are imposed by management actions (white exterior arrows) that eventually lead to resulting risk estimates.</p>
+</div>
 <div id="read-input-list" class="section level2 hasAnchor" number="2.1">
 <h2><span class="header-section-number">2.1</span> Read Input List<a href="inside-the-dst-initial-load-and-configure.html#read-input-list" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The DST identifies all model run variables that have been specified and assigns default values for those that have not been specified. A subfolder is generated (if it doesn’t already exist from a previous duplicated run). In our example from the above section, <a href="index.html#inputactions">InputActions</a>, the subfolder is named ‘ScenarioName.’ The DST determines the structure of InputActions (the .csv file or R list) and begins unlisting the provided InputActions.</p>
@@ -133,15 +137,13 @@
 <h2><span class="header-section-number">2.2</span> Load Data<a href="inside-the-dst-initial-load-and-configure.html#load-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The DST then loads in the following data inputs:</p>
 <ul>
-<li><p>Fishery Input Layer</p></li>
-<li><p>MapRef Layer</p></li>
-<li><p>Whale Density Layer</p></li>
-<li><p>Whale Vertical Distribution Layer</p></li>
-<li><p>Whale Body Dimensions</p></li>
-<li><p>Threat Model</p></li>
+<li>Fishery Input Layer</li>
+<li>Whale Density Layer</li>
+<li>Whale Vertical Distribution Layer</li>
+<li>Whale Body Dimensions</li>
+<li>Threat Model</li>
 </ul>
-<p>If any of these input files do not exist in the expected directory, the model will end and report an error that the specified file was not found. The model also checks for the four required elements within the fishery input layer (). Any missing shapefiles specified in the <code>InputActions</code> (Table <a href="index.html#tab:aco">1.1</a>) will also prevent the DST from moving on to model calculation stages.</p>
-
+<p>If any of these input files do not exist in the expected directory, the model will end and report an error that the specified file was not found. The model also checks for the four required elements within the fishery input layer (GearMap, GearPerString, CumulativeEffort, and LineStrength). Any missing shapefiles specified in the <code>InputActions</code> (see Table on constraints for actions in the <a href="index.html#available-scenario-inputactions">Available Scenario InputActions</a> section) will also prevent the DST from moving on to model calculation stages. The following section (<a href="inside-the-dst-model-stages.html#inside-the-dst-model-stages">Inside the DST: Model Stages</a>) will lay out the order of model stages and discuss each in detail.</p>
 </div>
 </div>
             </section>
@@ -181,7 +183,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/ALoMiller/DSTUserManual/edit/main/02-InsideDSTLoadConfigure.Rmd",
+"link": "https://github.com/ALoMiller/DSTUserManual/edit/main/index.Rmd",
 "text": "Edit"
 },
 "history": {
@@ -189,7 +191,7 @@ gitbook.start({
 "text": null
 },
 "view": {
-"link": "https://github.com/ALoMiller/DSTUserManual/blob/main/02-InsideDSTLoadConfigure.Rmd",
+"link": "https://github.com/ALoMiller/DSTUserManual/blob/main/index.Rmd",
 "text": null
 },
 "download": null,
